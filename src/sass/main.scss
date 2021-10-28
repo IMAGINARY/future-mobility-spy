@@ -1,1 +1,16 @@
 @import '~/node_modules/reseter.css/css/reseter.css';
+
+body {
+  background-color: black;
+}
+
+#content,
+#camera-video,
+#overlay,
+#config {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 0;
+}
