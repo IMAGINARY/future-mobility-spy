@@ -3,6 +3,7 @@ import ready from 'document-ready';
 const videoConstraints = {
   width: 1920,
   height: 1080,
+  frameRate: { ideal: 30.0 },
 };
 
 function clearDeviceIdAndReload() {
