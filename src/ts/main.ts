@@ -93,6 +93,13 @@ async function selectCamera() {
   });
 }
 
+function applyVideoStream(stream: MediaStream) {
+  videoElement.srcObject = stream;
+  const { width, height } = stream.getVideoTracks()[0].getSettings();
+  videoElement.width = width;
+  videoElement.height = height;
+}
+
 function getAndApplyTransforms() {
   applyTransforms(getTransforms());
 }
@@ -203,7 +210,7 @@ async function main() {
   try {
     const stream = await getCameraStream();
     console.log(stream);
-    videoElement.srcObject = stream;
+    applyVideoStream(stream);
     console.log('Camera access granted.');
   } catch (err) {
     console.log(err);
