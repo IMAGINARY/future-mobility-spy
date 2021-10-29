@@ -29,6 +29,10 @@ body,
   overflow: hidden;
   padding: 20px;
   background-color: #ffffff77;
+
+  > * {
+    padding-top: 20px;
+  }
 }
 
 #transforms {

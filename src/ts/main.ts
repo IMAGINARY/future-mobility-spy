@@ -16,6 +16,9 @@ import {
   clearTransformationButton,
   reloadTransformationButton,
   storeTransformationButton,
+  hideConfigMenuButton,
+  configMenuElement,
+  contentElement,
 } from './domElements';
 
 const videoConstraints = {
@@ -198,7 +201,15 @@ function getAndStoreTransforms() {
   return storeTransforms(getTransforms());
 }
 
-async function buildConfigUI() {
+function showConfigMenu(visible: boolean) {
+  configMenuElement.style.display = visible ? 'unset' : 'none';
+}
+
+function toggleConfigMenu() {
+  showConfigMenu(configMenuElement.style.display === 'none');
+}
+
+async function buildConfigMenu() {
   clearDeviceIdButton.onclick = clearDeviceIdAndReload;
 
   for (const transformElement of transformElements) {
@@ -209,10 +220,19 @@ async function buildConfigUI() {
   clearTransformationButton.onclick = clearTransforms;
   reloadTransformationButton.onclick = reloadTransforms;
   storeTransformationButton.onclick = getAndStoreTransforms;
+
+  contentElement.onclick = toggleConfigMenu;
+  hideConfigMenuButton.onclick = () => showConfigMenu(false);
 }
 
 async function main() {
-  await buildConfigUI();
+  alert(`TODO:
+- hide config UI when settings could be loaded from localStorage
+- rethink whole camera selection flow
+  - what happens if a deviceId has been stored but the device is not available (-> show centered message in dim gray: "camera not found", reload after timeout,)
+`);
+
+  await buildConfigMenu();
   const transforms = loadTransforms();
   if (transforms !== null) {
     setTransforms(transforms);

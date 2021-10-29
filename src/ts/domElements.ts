@@ -41,6 +41,12 @@ const storeTransformationButton = document.getElementById(
   'store-transformation'
 ) as HTMLButtonElement;
 
+const contentElement = document.getElementById('content');
+const configMenuElement = document.getElementById('config');
+const hideConfigMenuButton = document.getElementById(
+  'hide-config-ui'
+) as HTMLButtonElement;
+
 export {
   cameraSelectorElement,
   clearDeviceIdButton,
@@ -56,4 +62,7 @@ export {
   clearTransformationButton,
   reloadTransformationButton,
   storeTransformationButton,
+  contentElement,
+  configMenuElement,
+  hideConfigMenuButton,
 };
