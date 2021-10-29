@@ -1,4 +1,9 @@
 import ready from 'document-ready';
+import {
+  Idler,
+  PointerInterrupter,
+  KeyboardInterrupter,
+} from '@imaginary-maths/idler';
 
 import './domElements';
 import {
@@ -201,7 +206,16 @@ function getAndStoreTransforms() {
   return storeTransforms(getTransforms());
 }
 
+// Hide config menu after hideDelay ms
+const hideDelay = 20 * 1000;
+const idler = new Idler(
+  new PointerInterrupter(configMenuElement),
+  new KeyboardInterrupter()
+);
+idler.addCallback({ delay: hideDelay, onBegin: () => showConfigMenu(false) });
+
 function showConfigMenu(visible: boolean) {
+  idler.interrupt();
   configMenuElement.style.display = visible ? 'unset' : 'none';
 }
 
