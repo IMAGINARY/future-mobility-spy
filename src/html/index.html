@@ -7,18 +7,104 @@
     <script type="module" src="../ts/main.ts"></script>
   </head>
   <body>
-    <div id="content">
-      <video id="camera-video" autoplay></video>
-      <img
-        id="overlay"
-        alt="Overlay image"
-        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-      />
-    </div>
-    <div id="config">
-      <div><select id="camera-selector"></select></div>
-      <button id="access-camera-button" type="button">Access cameras</button>
-      <button id="clear-device-id" type="button">Clear stored device Id</button>
+    <div id="main">
+      <div id="content">
+        <video id="camera-video" autoplay></video>
+        <img
+          id="overlay"
+          alt="Overlay image"
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+        />
+      </div>
+      <div id="config">
+        <div>
+          <div><select id="camera-selector"></select></div>
+          <button id="access-camera-button" type="button">
+            Access cameras
+          </button>
+          <button id="clear-device-id" type="button">
+            Clear stored device Id
+          </button>
+        </div>
+        <div id="transforms">
+          <div>
+            <label>
+              Scale
+              <input
+                type="range"
+                min="0.25"
+                max="4"
+                step="0.1"
+                value="1"
+                class="slider"
+                id="scale"
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              Rotate
+              <input
+                type="range"
+                min="-180"
+                max="180"
+                value="0"
+                class="slider"
+                id="rotation"
+            /></label>
+          </div>
+          <div>
+            <label>
+              Translate X
+              <input
+                type="range"
+                min="-1200"
+                max="1200"
+                value="0"
+                class="slider"
+                id="translation-x"
+            /></label>
+          </div>
+          <div>
+            <label>
+              Translate Y
+              <input
+                type="range"
+                min="-1920"
+                max="1920"
+                value="0"
+                class="slider"
+                id="translation-y"
+            /></label>
+          </div>
+          <div>
+            <label>
+              <input type="checkbox" id="flip-h" />
+              FlipH
+            </label>
+            &nbsp;
+            <label>
+              <input type="checkbox" id="flip-v" />
+              FlipV
+            </label>
+          </div>
+          <input
+            id="store-transformation"
+            type="button"
+            value="Store transformation"
+          />
+          <input
+            id="reload-transformation"
+            type="button"
+            value="Reset transformation"
+          />
+          <input
+            id="clear-transformation"
+            type="button"
+            value="Clear transformation"
+          />
+        </div>
+      </div>
     </div>
   </body>
 </html>

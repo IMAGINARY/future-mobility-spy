@@ -1,8 +1,26 @@
 import ready from 'document-ready';
 
+import './domElements';
+import {
+  cameraSelectorElement,
+  clearDeviceIdButton,
+  videoElement,
+  flipHElement,
+  flipVElement,
+  scaleElement,
+  rotationElement,
+  translationXElement,
+  translationYElement,
+  transformElements,
+  accessCameraButton,
+  clearTransformationButton,
+  reloadTransformationButton,
+  storeTransformationButton,
+} from './domElements';
+
 const videoConstraints = {
-  width: 1920,
-  height: 1080,
+  width: { ideal: 1920 },
+  height: { ideal: 1080 },
   frameRate: { ideal: 30.0 },
 };
 
@@ -43,28 +61,24 @@ async function getCameraStream() {
 async function selectCamera() {
   const allDevices = await navigator.mediaDevices.enumerateDevices();
   const videoDevices = allDevices.filter((d) => d.kind === 'videoinput');
-  const selector = document.getElementById(
-    'camera-selector'
-  ) as HTMLSelectElement;
-  while (selector.children.length > 0) {
-    selector.removeChild(selector.children[selector.children.length]);
+  while (cameraSelectorElement.children.length > 0) {
+    cameraSelectorElement.removeChild(
+      cameraSelectorElement.children[cameraSelectorElement.children.length]
+    );
   }
   console.log(videoDevices);
   for (let videoDevice of videoDevices) {
     const option = document.createElement('option');
     option.value = videoDevice.deviceId;
     option.innerText = `${videoDevice.label} (${videoDevice.deviceId})`;
-    selector.appendChild(option);
+    cameraSelectorElement.appendChild(option);
   }
-  const accessCameraButton = document.getElementById(
-    'access-camera-button'
-  ) as HTMLButtonElement;
   accessCameraButton.disabled = false;
 
   return new Promise<MediaStream>((resolve, reject) => {
     accessCameraButton.onclick = async () => {
       try {
-        const stream = await getCameraStreamForId(selector.value);
+        const stream = await getCameraStreamForId(cameraSelectorElement.value);
         accessCameraButton.disabled = true;
         accessCameraButton.onclick = null;
         resolve(storeCameraId(stream));
@@ -79,20 +93,117 @@ async function selectCamera() {
   });
 }
 
+function getAndApplyTransforms() {
+  applyTransforms(getTransforms());
+}
+
+function applyTransforms(transforms: Transforms) {
+  const { translationX, translationY, rotation, scale, flipH, flipV } =
+    transforms;
+
+  let cssTransform = '';
+  cssTransform += ` translate(${translationX}px,${translationY}px)`;
+  cssTransform += ` rotate(${rotation}deg)`;
+  cssTransform += ` scale(${scale})`;
+  const flipScaleH = flipH ? -1 : 1;
+  const flipScaleV = flipV ? -1 : 1;
+  cssTransform += ` scale(${flipScaleH},${flipScaleV})`;
+  cssTransform = cssTransform.trim();
+
+  videoElement.style.transform = cssTransform;
+}
+
+function clearTransforms() {
+  for (const transformElement of transformElements) {
+    transformElement.value = transformElement.defaultValue;
+    transformElement.checked = transformElement.defaultChecked;
+  }
+  applyTransforms(getTransforms());
+}
+
+function reloadTransforms() {
+  const transforms = loadTransforms();
+  if (transforms !== null) {
+    applyTransforms(transforms);
+  } else {
+    clearTransforms();
+  }
+}
+
+interface Transforms {
+  translationX: number;
+  translationY: number;
+  rotation: number;
+  scale: number;
+  flipH: boolean;
+  flipV: boolean;
+}
+
+function getTransforms(): Transforms {
+  return {
+    translationX: translationXElement.valueAsNumber,
+    translationY: translationYElement.valueAsNumber,
+    rotation: rotationElement.valueAsNumber,
+    scale: scaleElement.valueAsNumber,
+    flipH: flipHElement.checked,
+    flipV: flipVElement.checked,
+  };
+}
+
+function setTransforms(transforms: Transforms) {
+  const { translationX, translationY, rotation, scale, flipH, flipV } =
+    transforms;
+  translationXElement.valueAsNumber = translationX;
+  translationYElement.valueAsNumber = translationY;
+  rotationElement.valueAsNumber = rotation;
+  scaleElement.valueAsNumber = scale;
+  flipHElement.checked = flipH;
+  flipVElement.checked = flipV;
+}
+
+function loadTransforms() {
+  const transformsString = localStorage.getItem('transforms');
+  if (transformsString === null) {
+    // could not load transform
+    return null;
+  } else {
+    return JSON.parse(transformsString) as Transforms;
+  }
+}
+
+function storeTransforms(transforms: Transforms) {
+  localStorage.setItem('transforms', JSON.stringify(transforms));
+  return transforms;
+}
+
+function getAndStoreTransforms() {
+  return storeTransforms(getTransforms());
+}
+
 async function buildConfigUI() {
-  const clearDeviceIdButton = document.getElementById('clear-device-id');
   clearDeviceIdButton.onclick = clearDeviceIdAndReload;
+
+  for (const transformElement of transformElements) {
+    transformElement.onchange = getAndApplyTransforms;
+    transformElement.oninput = getAndApplyTransforms;
+  }
+
+  clearTransformationButton.onclick = clearTransforms;
+  reloadTransformationButton.onclick = reloadTransforms;
+  storeTransformationButton.onclick = getAndStoreTransforms;
 }
 
 async function main() {
   await buildConfigUI();
+  const transforms = loadTransforms();
+  if (transforms !== null) {
+    setTransforms(transforms);
+    applyTransforms(transforms);
+  }
   try {
     const stream = await getCameraStream();
-    const videoTag = document.getElementById(
-      'camera-video'
-    ) as HTMLVideoElement;
     console.log(stream);
-    videoTag.srcObject = stream;
+    videoElement.srcObject = stream;
     console.log('Camera access granted.');
   } catch (err) {
     console.log(err);

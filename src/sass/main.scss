@@ -4,13 +4,36 @@ body {
   background-color: black;
 }
 
-#content,
-#camera-video,
-#overlay,
-#config {
+#main {
   position: absolute;
-  width: 100vw;
-  height: 100vh;
+  width: 1200px;
+  height: 1920px;
+}
+
+body,
+#content,
+#overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
   left: 0;
   top: 0;
+  overflow: hidden;
+}
+
+#config {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  padding: 20px;
+  background-color: #ffffff77;
+}
+
+#transforms {
+  padding-top: 20px;
+  input[type='range'] {
+    width: 100%;
+  }
 }
