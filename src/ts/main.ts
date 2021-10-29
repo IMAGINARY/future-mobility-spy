@@ -45,7 +45,9 @@ async function getCameraStream() {
   const storedDeviceId = localStorage.getItem('deviceId');
   if (storedDeviceId !== null) {
     try {
-      return await getCameraStreamForId(storedDeviceId);
+      const stream = await getCameraStreamForId(storedDeviceId);
+      await fillCameraSelector();
+      return stream;
     } catch (err) {
       if (err instanceof OverconstrainedError) {
         return await selectCamera();
@@ -58,7 +60,9 @@ async function getCameraStream() {
   }
 }
 
-async function selectCamera() {
+async function fillCameraSelector(
+  defaultDeviceId: string = undefined
+): Promise<void> {
   const allDevices = await navigator.mediaDevices.enumerateDevices();
   const videoDevices = allDevices.filter((d) => d.kind === 'videoinput');
   while (cameraSelectorElement.children.length > 0) {
@@ -73,8 +77,15 @@ async function selectCamera() {
     option.innerText = `${videoDevice.label} (${videoDevice.deviceId})`;
     cameraSelectorElement.appendChild(option);
   }
-  accessCameraButton.disabled = false;
+  if (typeof defaultDeviceId !== 'undefined') {
+    cameraSelectorElement.value = defaultDeviceId;
+  }
+}
 
+async function selectCamera() {
+  await fillCameraSelector();
+
+  accessCameraButton.disabled = false;
   return new Promise<MediaStream>((resolve, reject) => {
     accessCameraButton.onclick = async () => {
       try {
