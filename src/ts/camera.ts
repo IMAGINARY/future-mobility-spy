@@ -1,8 +1,5 @@
-import {
-  accessCameraButton,
-  cameraSelectorElement,
-  videoElement,
-} from './domElements';
+import { videoElement } from './domElements';
+import { convertTransformsToCss, Transforms } from './transforms';
 
 const videoConstraints = {
   width: { ideal: 1920 },
@@ -10,91 +7,140 @@ const videoConstraints = {
   frameRate: { ideal: 30.0 },
 };
 
-function clearDeviceIdAndReload() {
-  localStorage.removeItem('deviceId');
-  window.location.reload();
-}
+const reconnectionDelay = 10 * 1000;
+const defaultDeviceId = '';
 
-function storeCameraId(stream: MediaStream) {
-  const deviceId = stream.getVideoTracks()[0].getSettings().deviceId;
-  localStorage.setItem('deviceId', deviceId);
-  return stream;
-}
+export class Camera {
+  private deviceId: string;
+  private stream: MediaStream;
+  private reconnectionTimeout: number;
 
-async function getCameraStreamForId(deviceId) {
-  return await navigator.mediaDevices.getUserMedia({
-    video: { ...videoConstraints, deviceId: { exact: deviceId } },
-  });
-}
+  public static ondevicechange: Function = undefined;
 
-async function getCameraStream() {
-  const storedDeviceId = localStorage.getItem('deviceId');
-  if (storedDeviceId !== null) {
+  protected static lastVideoDeviceInfos: MediaDeviceInfo[] = [];
+  private static staticInitializer = () => {
+    navigator.mediaDevices.addEventListener('devicechange', () =>
+      Camera.handleDeviceChange()
+    );
+  };
+
+  constructor() {
+    this.deviceId = defaultDeviceId;
+    this.reconnectionTimeout = 0;
+    this.stream = null;
+
+    navigator.mediaDevices.addEventListener('devicechange', async () => {
+      if (this.reconnectionTimeout !== 0) {
+        await this.tryReconnect();
+      }
+    });
+  }
+
+  static async enumerate(): Promise<MediaDeviceInfo[]> {
+    const mediaDeviceInfos = await navigator.mediaDevices.enumerateDevices();
+    const videoDeviceInfos = mediaDeviceInfos.filter(
+      (d) => d.kind === 'videoinput'
+    );
+    this.lastVideoDeviceInfos = videoDeviceInfos;
+    return videoDeviceInfos;
+  }
+
+  getDeviceId(): string {
+    return this.deviceId;
+  }
+
+  protected getStreamDeviceId() {
+    return this.stream !== null
+      ? this.stream.getVideoTracks()[0].getSettings().deviceId
+      : defaultDeviceId;
+  }
+
+  disconnectStream() {
+    if (this.stream !== null) {
+      this.stream.getVideoTracks()[0].onended = undefined;
+      this.stream = null;
+      videoElement.src = null;
+      videoElement.srcObject = null;
+    }
+  }
+
+  disconnect() {
+    if (this.stream !== null) {
+      console.info('Disconnecting camera:', this.getStreamDeviceId());
+      this.disconnectStream();
+    }
+  }
+
+  connectTo(deviceId: string) {
+    this.deviceId = deviceId;
+    this.disconnect();
+    this.tryReconnect().then();
+  }
+
+  async tryReconnect() {
+    window.clearTimeout(this.reconnectionTimeout);
+    this.reconnectionTimeout = 0;
+    const deviceId = this.deviceId;
+    console.info('Connecting to camera:', deviceId);
     try {
-      const stream = await getCameraStreamForId(storedDeviceId);
-      await fillCameraSelector();
-      return stream;
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { ...videoConstraints, deviceId: { exact: deviceId } },
+      });
+      if (this.deviceId === deviceId) {
+        this.handleConnected(stream);
+      }
     } catch (err) {
-      if (err instanceof OverconstrainedError) {
-        return await selectCamera();
+      console.warn(`Unable to connect to camera (${this.deviceId})`, err);
+      console.info(`Attempting reconnecting in ${reconnectionDelay}ms`);
+      this.reconnectionTimeout = window.setTimeout(
+        () => this.tryReconnect(),
+        reconnectionDelay
+      );
+    }
+  }
+
+  protected static async handleDeviceChange() {
+    const lastVideoDeviceInfos = this.lastVideoDeviceInfos;
+    const videoDeviceInfos = await this.enumerate();
+    console.info('Device list changed:', videoDeviceInfos);
+    if (typeof this.ondevicechange === 'function') {
+      if (lastVideoDeviceInfos.length !== videoDeviceInfos.length) {
+        this.ondevicechange();
       } else {
-        throw err;
+        for (const videoDeviceInfo of videoDeviceInfos) {
+          const idx = lastVideoDeviceInfos.findIndex(
+            (i) => i.deviceId === videoDeviceInfo.deviceId
+          );
+          if (idx === -1) {
+            // an element changed in the list
+            this.ondevicechange();
+            return;
+          }
+        }
       }
     }
-  } else {
-    return await selectCamera();
+  }
+
+  protected handleConnected(stream: MediaStream) {
+    if (this.stream !== null) {
+      this.stream.getVideoTracks()[0].onended = undefined;
+    }
+    this.stream = stream;
+    console.info('Camera connected:', this.deviceId);
+    const { width, height } = stream.getVideoTracks()[0].getSettings();
+    videoElement.srcObject = stream;
+    videoElement.width = width;
+    videoElement.height = height;
+    stream.getVideoTracks()[0].onended = () => this.handleDisconnected();
+  }
+
+  protected handleDisconnected() {
+    console.warn('Camera disconnected:', this.deviceId);
+    this.disconnectStream();
+    this.tryReconnect().then();
+  }
+
+  applyTransforms(transforms: Transforms) {
+    videoElement.style.transform = convertTransformsToCss(transforms);
   }
 }
-
-async function fillCameraSelector(
-  defaultDeviceId: string = undefined
-): Promise<void> {
-  const allDevices = await navigator.mediaDevices.enumerateDevices();
-  const videoDevices = allDevices.filter((d) => d.kind === 'videoinput');
-  while (cameraSelectorElement.children.length > 0) {
-    cameraSelectorElement.removeChild(
-      cameraSelectorElement.children[cameraSelectorElement.children.length]
-    );
-  }
-  console.log(videoDevices);
-  for (let videoDevice of videoDevices) {
-    const option = document.createElement('option');
-    option.value = videoDevice.deviceId;
-    option.innerText = `${videoDevice.label} (${videoDevice.deviceId})`;
-    cameraSelectorElement.appendChild(option);
-  }
-  if (typeof defaultDeviceId !== 'undefined') {
-    cameraSelectorElement.value = defaultDeviceId;
-  }
-}
-
-async function selectCamera() {
-  await fillCameraSelector();
-
-  accessCameraButton.disabled = false;
-  return new Promise<MediaStream>((resolve, reject) => {
-    accessCameraButton.onclick = async () => {
-      try {
-        const stream = await getCameraStreamForId(cameraSelectorElement.value);
-        accessCameraButton.disabled = true;
-        accessCameraButton.onclick = null;
-        resolve(storeCameraId(stream));
-      } catch (err) {
-        alert(
-          'Could acquire camera. Please check the console log for details.'
-        );
-        console.log(err);
-        reject(err);
-      }
-    };
-  });
-}
-
-function applyVideoStream(stream: MediaStream) {
-  videoElement.srcObject = stream;
-  const { width, height } = stream.getVideoTracks()[0].getSettings();
-  videoElement.width = width;
-  videoElement.height = height;
-}
-
-export { clearDeviceIdAndReload, getCameraStream, applyVideoStream };
