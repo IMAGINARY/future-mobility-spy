@@ -1,28 +1,22 @@
-const cameraSelectorElement = document.getElementById(
-  'camera-selector'
-) as HTMLSelectElement;
-const clearDeviceIdButton = document.getElementById(
-  'clear-device-id'
-) as HTMLButtonElement;
-const accessCameraButton = document.getElementById(
-  'access-camera-button'
-) as HTMLButtonElement;
+function qs<T extends Element>(selectors: string): T {
+  return document.querySelector(selectors) as T;
+}
 
-const videoElement = document.getElementById(
-  'camera-video'
-) as HTMLVideoElement;
+export const cameraSelectorElement = qs<HTMLSelectElement>('#camera-selector');
+export const clearDeviceIdButton = qs<HTMLButtonElement>('#clear-device-id');
+export const accessCameraButton = qs<HTMLButtonElement>(
+  '#access-camera-button'
+);
 
-const flipHElement = document.getElementById('flip-h') as HTMLInputElement;
-const flipVElement = document.getElementById('flip-v') as HTMLInputElement;
-const scaleElement = document.getElementById('scale') as HTMLInputElement;
-const rotationElement = document.getElementById('rotation') as HTMLInputElement;
-const translationXElement = document.getElementById(
-  'translation-x'
-) as HTMLInputElement;
-const translationYElement = document.getElementById(
-  'translation-y'
-) as HTMLInputElement;
-const transformElements = [
+export const videoElement = qs<HTMLVideoElement>('#camera-video');
+
+export const flipHElement = qs<HTMLInputElement>('#flip-h');
+export const flipVElement = qs<HTMLInputElement>('#flip-v');
+export const scaleElement = qs<HTMLInputElement>('#scale');
+export const rotationElement = qs<HTMLInputElement>('#rotation');
+export const translationXElement = qs<HTMLInputElement>('#translation-x');
+export const translationYElement = qs<HTMLInputElement>('#translation-y');
+export const transformElements = [
   translationXElement,
   translationYElement,
   rotationElement,
@@ -31,42 +25,19 @@ const transformElements = [
   flipVElement,
 ];
 
-const clearTransformationButton = document.getElementById(
-  'clear-transformation'
-) as HTMLButtonElement;
-const reloadTransformationButton = document.getElementById(
-  'reload-transformation'
-) as HTMLButtonElement;
-const storeTransformationButton = document.getElementById(
-  'store-transformation'
-) as HTMLButtonElement;
+export const clearTransformationButton = qs<HTMLButtonElement>(
+  '#clear-transformation'
+);
+export const reloadTransformationButton = qs<HTMLButtonElement>(
+  '#reload-transformation'
+);
+export const storeTransformationButton = qs<HTMLButtonElement>(
+  '#store-transformation'
+);
 
-const contentElement = document.getElementById('content');
-const configMenuElement = document.getElementById('config');
-const hideConfigMenuButton = document.getElementById(
-  'hide-config-ui-button'
-) as HTMLButtonElement;
-const clearButton = document.getElementById(
-  'clear-button'
-) as HTMLButtonElement;
-
-export {
-  cameraSelectorElement,
-  clearDeviceIdButton,
-  accessCameraButton,
-  videoElement,
-  flipHElement,
-  flipVElement,
-  scaleElement,
-  rotationElement,
-  translationXElement,
-  translationYElement,
-  transformElements,
-  clearTransformationButton,
-  reloadTransformationButton,
-  storeTransformationButton,
-  contentElement,
-  configMenuElement,
-  hideConfigMenuButton,
-  clearButton,
-};
+export const contentElement = qs<HTMLElement>('#content');
+export const configMenuElement = qs<HTMLElement>('#config');
+export const hideConfigMenuButton = qs<HTMLButtonElement>(
+  '#hide-config-ui-button'
+);
+export const clearButton = qs<HTMLButtonElement>('#clear-button');
