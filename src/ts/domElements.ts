@@ -44,7 +44,10 @@ const storeTransformationButton = document.getElementById(
 const contentElement = document.getElementById('content');
 const configMenuElement = document.getElementById('config');
 const hideConfigMenuButton = document.getElementById(
-  'hide-config-ui'
+  'hide-config-ui-button'
+) as HTMLButtonElement;
+const clearButton = document.getElementById(
+  'clear-button'
 ) as HTMLButtonElement;
 
 export {
@@ -65,4 +68,5 @@ export {
   contentElement,
   configMenuElement,
   hideConfigMenuButton,
+  clearButton,
 };

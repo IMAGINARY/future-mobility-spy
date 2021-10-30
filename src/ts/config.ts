@@ -1,4 +1,5 @@
 import {
+  clearButton,
   clearDeviceIdButton,
   clearTransformationButton,
   configMenuElement,
@@ -29,6 +30,11 @@ const idler = new Idler(
 );
 idler.addCallback({ delay: hideDelay, onBegin: () => showConfigMenu(false) });
 
+export function clearConfig() {
+  localStorage.clear();
+  location.reload();
+}
+
 export function showConfigMenu(visible: boolean) {
   idler.interrupt();
   configMenuElement.style.display = visible ? 'unset' : 'none';
@@ -52,4 +58,5 @@ export async function buildConfigMenu() {
 
   contentElement.onclick = toggleConfigMenu;
   hideConfigMenuButton.onclick = () => showConfigMenu(false);
+  clearButton.onclick = () => clearConfig();
 }
