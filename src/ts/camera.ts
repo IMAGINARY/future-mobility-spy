@@ -18,11 +18,12 @@ export class Camera {
   public static ondevicechange: Function = undefined;
 
   protected static lastVideoDeviceInfos: MediaDeviceInfo[] = [];
-  private static staticInitializer = () => {
+  private static staticInitializer = (() => {
     navigator.mediaDevices.addEventListener('devicechange', () =>
       Camera.handleDeviceChange()
     );
-  };
+    return true;
+  })();
 
   constructor() {
     this.deviceId = defaultDeviceId;
