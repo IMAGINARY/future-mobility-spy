@@ -52,8 +52,8 @@ export class ConfigMenu {
       transformElement.oninput = onTransformsChangedCb;
     }
 
-    contentElement.onclick = () => this.toggleConfigMenu();
-    hideConfigMenuButton.onclick = () => this.showConfigMenu(false);
+    contentElement.onclick = () => this.toggle();
+    hideConfigMenuButton.onclick = () => this.show(false);
     reloadPageMenuButton.onclick = () => location.reload();
 
     loadButton.onclick = () => this.load();
@@ -70,7 +70,7 @@ export class ConfigMenu {
     );
     this.idler.addCallback({
       delay: hideDelay,
-      onBegin: () => this.showConfigMenu(false),
+      onBegin: () => this.show(false),
     });
   }
 
@@ -240,13 +240,17 @@ export class ConfigMenu {
     this.setTransforms(transforms);
   }
 
-  showConfigMenu(visible: boolean) {
-    this.idler.interrupt();
-    configMenuElement.style.display = visible ? 'unset' : 'none';
+  isVisible(): boolean {
+    return configMenuElement.style.display === 'block';
   }
 
-  toggleConfigMenu() {
-    this.showConfigMenu(configMenuElement.style.display === 'none');
+  show(visible: boolean) {
+    this.idler.interrupt();
+    configMenuElement.style.display = visible ? 'block' : 'none';
+  }
+
+  toggle() {
+    this.show(!this.isVisible());
   }
 
   static async getInstance(): Promise<ConfigMenu> {

@@ -4,7 +4,6 @@ import { ConfigMenu } from './configMenu';
 
 async function main() {
   const configMenu = await ConfigMenu.getInstance();
-  configMenu.showConfigMenu(false);
   global.configMenu = configMenu;
 }
 
