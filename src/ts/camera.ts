@@ -48,7 +48,7 @@ export class Camera {
 
   static async requestPermission(): Promise<boolean> {
     try {
-      await navigator.mediaDevices.getUserMedia({ video: true });
+      await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
       return true;
     } catch (err) {
       console.error('Could not acquire permission to access camera', err);
