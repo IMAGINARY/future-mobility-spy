@@ -58,3 +58,11 @@ body,
 #reload-page-button {
   float: right;
 }
+
+.succeeded {
+  background-color: #239b56;
+}
+
+.failed {
+  background-color: #b03a2e;
+}

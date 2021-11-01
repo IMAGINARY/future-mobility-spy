@@ -8,6 +8,7 @@ import {
   loadButton,
   loadDefaultsButton,
   reloadPageMenuButton,
+  requestCameraPermissionButton,
   rotationElement,
   scaleElement,
   storeButton,
@@ -61,6 +62,8 @@ export class ConfigMenu {
     loadDefaultsButton.onclick = () => this.loadDefaults();
 
     cameraSelectorElement.onchange = () => this.handleCameraSelected();
+    requestCameraPermissionButton.onclick = async () =>
+      this.handleRequestCameraPermission();
 
     // Hide config menu after hideDelay ms
     const hideDelay = 20 * 1000;
@@ -238,6 +241,18 @@ export class ConfigMenu {
       flipV: flipVElement.checked,
     };
     this.setTransforms(transforms);
+  }
+
+  async handleRequestCameraPermission() {
+    requestCameraPermissionButton.disabled = true;
+    requestCameraPermissionButton.classList.remove('failed', 'succeeded');
+    const granted = await Camera.requestPermission();
+    const cssClass = granted ? 'succeeded' : 'failed';
+    requestCameraPermissionButton.classList.add(cssClass);
+    if (granted) {
+      await this.updateCameraSelector(await Camera.enumerate());
+    }
+    requestCameraPermissionButton.disabled = false;
   }
 
   isVisible(): boolean {

@@ -8,6 +8,9 @@ export const configMenuElement = qs<HTMLElement>('#config');
 
 export const videoElement = qs<HTMLVideoElement>('#camera-video');
 export const cameraSelectorElement = qs<HTMLSelectElement>('#camera-selector');
+export const requestCameraPermissionButton = qs<HTMLButtonElement>(
+  '#request-camera-permission-button'
+);
 
 export const scaleElement = qs<HTMLInputElement>('#scale');
 export const rotationElement = qs<HTMLInputElement>('#rotation');

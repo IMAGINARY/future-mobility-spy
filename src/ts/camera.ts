@@ -46,6 +46,16 @@ export class Camera {
     return videoDeviceInfos;
   }
 
+  static async requestPermission(): Promise<boolean> {
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true });
+      return true;
+    } catch (err) {
+      console.error('Could not acquire permission to access camera', err);
+      return false;
+    }
+  }
+
   getDeviceId(): string {
     return this.deviceId;
   }
