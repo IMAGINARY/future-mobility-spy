@@ -39,7 +39,10 @@ npm run deploy
 
 ## Running
 
-A web server for serving static files is required. Something simple like
+The Parcel development server should not be used in production.
+Hence, a web server is required for serving static files from `dist`.
+
+Something simple like
 
 ```
 npm reload --dir dist
@@ -53,7 +56,7 @@ python3 -m http.server --directory dist
 
 suffices.
 
-Point your web browser to `http://localhost:[PORT]/` where `PORT` is port number of the web server.
+Point your web browser to `http://localhost:PORT/` where `PORT` is port number of the web server.
 Depending on the web browser used, it may be necessary to grant access to the web camera separately.
 
 ## Configuration storage
